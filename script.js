@@ -11,13 +11,7 @@ const WORKER_URL =
   localConfig.WORKER_URL || "https://YOUR-WORKER-URL.workers.dev";
 
 // The conversation history is sent on every request to keep context.
-const messages = [
-  {
-    role: "system",
-    content:
-      "You are a helpful L'Oréal beauty assistant. Stay focused on L'Oréal products, routines, recommendations, and beauty-related topics. If a question is unrelated, politely refuse and redirect the user back to L'Oréal beauty help. Give inclusive, clear, beginner-friendly guidance. Avoid medical claims and mention that users should patch test new products.",
-  },
-];
+const conversationMessages = [];
 
 // Store extra context so the chatbot can handle multi-turn conversations naturally.
 const userContext = {
@@ -58,19 +52,9 @@ function updateConversationContext(questionText) {
 }
 
 function buildContextSystemMessage() {
-  const nameLine = userContext.name
-    ? `User name: ${userContext.name}.`
-    : "User name: unknown.";
-
-  const questionsLine = userContext.pastQuestions.length
-    ? userContext.pastQuestions
-        .map((question, index) => `${index + 1}. ${question}`)
-        .join("\n")
-    : "No previous questions yet.";
-
   return {
-    role: "system",
-    content: `${nameLine}\nPrevious user questions:\n${questionsLine}\nUse this context naturally in your next response.`,
+    name: userContext.name,
+    pastQuestions: [...userContext.pastQuestions],
   };
 }
 
@@ -116,13 +100,7 @@ chatForm.addEventListener("submit", async (event) => {
   userInput.value = "";
   sendBtn.disabled = true;
 
-  messages.push({ role: "user", content: text });
-
-  const requestMessages = [
-    messages[0],
-    buildContextSystemMessage(),
-    ...messages.slice(1),
-  ];
+  conversationMessages.push({ role: "user", content: text });
 
   try {
     const response = await fetch(WORKER_URL, {
@@ -130,7 +108,10 @@ chatForm.addEventListener("submit", async (event) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ messages: requestMessages }),
+      body: JSON.stringify({
+        messages: conversationMessages,
+        context: buildContextSystemMessage(),
+      }),
     });
 
     if (!response.ok) {
@@ -145,7 +126,7 @@ chatForm.addEventListener("submit", async (event) => {
     }
 
     addMessage("assistant", assistantReply);
-    messages.push({ role: "assistant", content: assistantReply });
+    conversationMessages.push({ role: "assistant", content: assistantReply });
   } catch (error) {
     addMessage(
       "assistant",

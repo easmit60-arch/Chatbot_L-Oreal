@@ -42,13 +42,37 @@ export default {
       );
     }
 
+    const context = userInput.context || {};
+    const userName =
+      typeof context.name === "string" && context.name.trim()
+        ? context.name.trim()
+        : "unknown";
+    const pastQuestions = Array.isArray(context.pastQuestions)
+      ? context.pastQuestions
+          .filter((question) => typeof question === "string" && question.trim())
+          .slice(-8)
+      : [];
+
+    const contextSummary = [
+      `User name: ${userName}.`,
+      pastQuestions.length
+        ? `Previous user questions:\n${pastQuestions
+            .map((question, index) => `${index + 1}. ${question}`)
+            .join("\n")}`
+        : "Previous user questions: none.",
+    ].join("\n");
+
     const requestBody = {
       model: "gpt-4o",
       messages: [
         {
           role: "system",
           content:
-            "You are a helpful L'Oréal beauty assistant. Stay focused on L'Oréal products, routines, recommendations, and beauty-related topics. If the user asks about something unrelated, politely refuse and redirect them back to L'Oréal beauty help. Give inclusive, clear, beginner-friendly guidance. Avoid medical claims and mention that users should patch test new products.",
+            "You are L'Oréal Beauty Advisor, a luxury-editorial, ingredient-savvy chatbot. Maintain a warm, elegant, calm, confident, and supportive presence. Stay focused on L'Oréal Group products, routines, recommendations, and beauty-related topics only. If a question is unrelated, politely refuse and redirect the user back to L'Oréal beauty help. Ask one elegant, clear question at a time. Maintain and use internal conversation context, including the user name and past questions, but use the name sparingly. When recommending products, offer 1 to 3 L'Oréal Group products only, explain briefly why each fits, and keep the tone refined, concise, and sensory. Never give medical advice or diagnose conditions. When responding, use short paragraphs and structure the answer with a brief reasoning section followed by a conclusion. Avoid emojis, exclamation marks, hard selling, slang, and hype language.",
+        },
+        {
+          role: "system",
+          content: contextSummary,
         },
         ...userInput.messages,
       ],
