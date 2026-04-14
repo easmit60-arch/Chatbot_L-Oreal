@@ -126,7 +126,7 @@ function addMessage(role, content) {
 
 addMessage(
   "assistant",
-  "Hi! Ask me about skincare, haircare, makeup, or fragrance routines.",
+  "Welcome. Share your beauty goals, and I can help with L'Oréal skincare, haircare, makeup, and fragrance recommendations.",
 );
 
 /* Handle form submit */

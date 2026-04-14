@@ -12,6 +12,18 @@ export default {
       return new Response(null, { headers: corsHeaders });
     }
 
+    // Serve the static site for normal page and asset requests.
+    if (request.method === "GET" || request.method === "HEAD") {
+      if (env.ASSETS && typeof env.ASSETS.fetch === "function") {
+        return env.ASSETS.fetch(request);
+      }
+
+      return new Response("Asset binding not configured.", {
+        status: 500,
+        headers: corsHeaders,
+      });
+    }
+
     if (request.method !== "POST") {
       return new Response(JSON.stringify({ error: "Method not allowed" }), {
         status: 405,
@@ -40,6 +52,76 @@ export default {
         }),
         { status: 400, headers: corsHeaders },
       );
+    }
+
+    const latestUserMessage = [...userInput.messages]
+      .reverse()
+      .find(
+        (message) =>
+          message?.role === "user" && typeof message?.content === "string",
+      );
+
+    const latestUserText = (latestUserMessage?.content || "").toLowerCase();
+
+    // Lightweight scope check so clearly unrelated prompts are politely refused.
+    const lorealScopeKeywords = [
+      "l'oreal",
+      "loreal",
+      "beauty",
+      "skincare",
+      "skin care",
+      "haircare",
+      "hair care",
+      "makeup",
+      "fragrance",
+      "routine",
+      "serum",
+      "moisturizer",
+      "foundation",
+      "shampoo",
+      "conditioner",
+      "cerave",
+      "la roche-posay",
+      "vichy",
+      "kiehl",
+      "maybelline",
+      "nyx",
+      "lancome",
+      "armani",
+      "ysl",
+      "urban decay",
+      "redken",
+      "pureology",
+      "matrix",
+      "biolage",
+    ];
+
+    const isInScope = lorealScopeKeywords.some((keyword) =>
+      latestUserText.includes(keyword),
+    );
+
+    if (latestUserText && !isInScope) {
+      const refusalPayload = {
+        id: "chatcmpl-refusal",
+        object: "chat.completion",
+        created: Math.floor(Date.now() / 1000),
+        model: "gpt-4o",
+        choices: [
+          {
+            index: 0,
+            finish_reason: "stop",
+            message: {
+              role: "assistant",
+              content:
+                "I can only help with L'Oréal products, routines, and beauty-related questions. If you share your beauty goal, I can recommend suitable L'Oréal options.",
+            },
+          },
+        ],
+      };
+
+      return new Response(JSON.stringify(refusalPayload), {
+        headers: corsHeaders,
+      });
     }
 
     const context = userInput.context || {};
