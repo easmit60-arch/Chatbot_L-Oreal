@@ -71,6 +71,27 @@ function buildContextSystemMessage() {
   };
 }
 
+function getFriendlyErrorMessage(error, response) {
+  const isAccessProtected =
+    response?.status === 302 ||
+    response?.url?.includes("cloudflareaccess.com") ||
+    error?.message?.includes("status 302");
+
+  if (isAccessProtected) {
+    return "Your Worker is behind Cloudflare Access, so this page cannot call it yet. Sign in to Access or use an unprotected Worker URL in secrets.js.";
+  }
+
+  if (response?.status === 401 || response?.status === 403) {
+    return "The Worker request was blocked (401/403). Check your Worker access policy and deployment settings.";
+  }
+
+  if (response?.status === 404) {
+    return "The Worker endpoint was not found. Confirm your URL and that /api/chat is deployed.";
+  }
+
+  return "Sorry, I hit an error. Check your Worker URL and try again.";
+}
+
 async function testWorkerConnection() {
   const response = await fetch(WORKER_URL, {
     method: "POST",
@@ -173,10 +194,18 @@ chatForm.addEventListener("submit", async (event) => {
     addMessage("assistant", assistantReply);
     conversationMessages.push({ role: "assistant", content: assistantReply });
   } catch (error) {
-    addMessage(
-      "assistant",
-      "Sorry, I hit an error. Check your Worker URL and try again.",
-    );
+    let response;
+
+    // If fetch resolved, response details are in the thrown status message.
+    // If fetch failed before getting a response, keep response undefined.
+    if (error.message.includes("status")) {
+      const statusMatch = error.message.match(/status\s+(\d{3})/i);
+      if (statusMatch) {
+        response = { status: Number(statusMatch[1]) };
+      }
+    }
+
+    addMessage("assistant", getFriendlyErrorMessage(error, response));
     console.error(error);
   } finally {
     sendBtn.disabled = false;
