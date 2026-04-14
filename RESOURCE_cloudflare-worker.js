@@ -1,4 +1,7 @@
-export default {
+export default {fetch("https://l0realchatbot.easmit60.workers.dev", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: [{ role: "user", content: "ping" }] }) })
+  .then(r => r.text().then(t => console.log("STATUS:", r.status, "BODY:", t.slice(0, 300))))
+  .catch(e => console.log("NETWORK ERROR:", e));
+
   async fetch(request, env) {
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
