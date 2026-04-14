@@ -13,7 +13,7 @@ When deploying through Cloudflare, make sure your API request body (in `script.j
 
 ### Secure deployment checklist
 
-1.Play & Practice https://github.com/easmit60-arch/Chatbot_MeshUp
+1.Play & Practice https://github.com/easmit60-arch/Chatbot_MeshUp.
 2. Paste the code from `RESOURCE_cloudflare-worker.js` into a Cloudflare Worker.
 3. Add your OpenAI API key in Cloudflare under **Variables and Secrets** as `OPENAI_API_KEY`.
 4. Deploy the Worker and copy the Worker URL that Cloudflare provides.
