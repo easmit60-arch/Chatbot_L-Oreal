@@ -11,4 +11,11 @@ L’Oréal is exploring the power of AI, and your job is to showcase what's poss
 
 When deploying through Cloudflare, make sure your API request body (in `script.js`) includes a `messages` array and handle the response by extracting `data.choices[0].message.content`.
 
+### Secure deployment checklist
+
+1. Paste the code from `RESOURCE_cloudflare-worker.js` into a Cloudflare Worker.
+2. Add your OpenAI API key in Cloudflare under **Variables and Secrets** as `OPENAI_API_KEY`.
+3. Deploy the Worker and copy the Worker URL that Cloudflare provides.
+4. Put that Worker URL into `secrets.js` under `WORKER_URL` for local testing.
+
 Enjoy building your L’Oréal beauty assistant! 💄
