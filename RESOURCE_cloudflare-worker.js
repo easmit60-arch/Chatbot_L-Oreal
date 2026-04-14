@@ -1,5 +1,7 @@
 export default {
   async fetch(request, env) {
+    const url = new URL(request.url);
+
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -27,6 +29,14 @@ export default {
     if (request.method !== "POST") {
       return new Response(JSON.stringify({ error: "Method not allowed" }), {
         status: 405,
+        headers: corsHeaders,
+      });
+    }
+
+    // Chat API accepts POST only on /api/chat.
+    if (url.pathname !== "/api/chat") {
+      return new Response(JSON.stringify({ error: "Not found" }), {
+        status: 404,
         headers: corsHeaders,
       });
     }

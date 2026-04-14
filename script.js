@@ -8,7 +8,20 @@ const latestQuestion = document.getElementById("latestQuestion");
 // Optional local override: define window.LOCAL_CONFIG.WORKER_URL before script.js.
 const localConfig = window.LOCAL_CONFIG || {};
 const DEFAULT_WORKER_URL = "https://l0realchatbot.easmit60.workers.dev";
-const WORKER_URL = localConfig.WORKER_URL || DEFAULT_WORKER_URL;
+
+function resolveChatEndpoint(url) {
+  const trimmedUrl = url.replace(/\/$/, "");
+
+  if (trimmedUrl.endsWith("/api/chat")) {
+    return trimmedUrl;
+  }
+
+  return `${trimmedUrl}/api/chat`;
+}
+
+const WORKER_URL = resolveChatEndpoint(
+  localConfig.WORKER_URL || DEFAULT_WORKER_URL,
+);
 
 // The conversation history is sent on every request to keep context.
 const conversationMessages = [];
