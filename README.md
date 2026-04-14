@@ -18,4 +18,14 @@ When deploying through Cloudflare, make sure your API request body (in `script.j
 3. Deploy the Worker and copy the Worker URL that Cloudflare provides.
 4. Put that Worker URL into `secrets.js` under `WORKER_URL` for local testing.
 
+### Verify the Worker connection
+
+After you replace `WORKER_URL` in `secrets.js` with the deployed Cloudflare Worker URL, open the browser DevTools console and run:
+
+```js
+await window.testWorkerConnection();
+```
+
+If the URL is still a placeholder, the helper will warn you instead of sending a request.
+
 Enjoy building your L’Oréal beauty assistant! 💄

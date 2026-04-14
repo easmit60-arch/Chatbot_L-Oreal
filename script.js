@@ -8,7 +8,15 @@ const latestQuestion = document.getElementById("latestQuestion");
 // secrets.js can define window.LOCAL_CONFIG for local development only.
 const localConfig = window.LOCAL_CONFIG || {};
 const WORKER_URL =
-  localConfig.WORKER_URL || "https://YOUR-WORKER-URL.workers.dev";
+  localConfig.WORKER_URL || "l0realchatbot.easmit60.workers.dev";
+
+const workerUrlIsPlaceholder = WORKER_URL.includes("l0realchatbot.easmit60.workers.dev");
+
+if (workerUrlIsPlaceholder) {
+  console.warn(
+    "Worker URL is still a placeholder. Replace secrets.js WORKER_URL with your deployed Cloudflare Worker URL.",
+  );
+}
 
 // The conversation history is sent on every request to keep context.
 const conversationMessages = [];
@@ -57,6 +65,41 @@ function buildContextSystemMessage() {
     pastQuestions: [...userContext.pastQuestions],
   };
 }
+
+async function testWorkerConnection() {
+  if (workerUrlIsPlaceholder) {
+    console.warn(
+      "Cannot test the Worker yet because WORKER_URL is still a placeholder.",
+    );
+    return null;
+  }
+
+  const response = await fetch(WORKER_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      messages: [
+        {
+          role: "user",
+          content:
+            "Reply with a one-sentence hello so I can confirm the Worker is live.",
+        },
+      ],
+      context: {
+        name: "",
+        pastQuestions: [],
+      },
+    }),
+  });
+
+  const data = await response.json();
+  console.log("Worker test response:", data);
+  return data;
+}
+
+window.testWorkerConnection = testWorkerConnection;
 
 function addMessage(role, content) {
   const messageRow = document.createElement("div");
