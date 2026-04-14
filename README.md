@@ -31,6 +31,8 @@ await window.testWorkerConnection();
 If the Worker is connected correctly, you will see a JSON response in the console.
 
 ## 🔄 Troubleshooting: Ouroboros Loop Pattern
+### Reflections
+"Here we go for the 13th time", I was in a loop for 13 hours trying to figure out why the AI agent is changing the code * write. Everytime I would have AI write in the Worker Script it would rewrite over what I wrote, thus causing a error. I would do it again, I put in gaurdrails in Copilot, it was not following the ones I was putting in place while actively changing the code to align with guardrails put into place by the professor. I had to edit the code to that was in the RESOURCE_cloudflare-worker to add a listner and sync.
 
 ### Symptom: "Sorry, I hit an error. Check your Worker URL and try again."
 
