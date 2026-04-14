@@ -56,11 +56,13 @@ If your app shows a generic error and curl tests reveal HTTP 302 redirects to Cl
 3. **Policy changed but has not propagated yet.**
    - Wait 1–2 minutes for Cloudflare edge propagation.
    - In terminal, confirm:
+
      ```bash
      curl -sS -i -X POST 'https://l0realchatbot.easmit60.workers.dev/api/chat' \
        -H 'Content-Type: application/json' \
        --data '{"messages":[{"role":"user","content":"hello"}],"context":{"name":"","pastQuestions":[]}}'
      ```
+     
    - If status is still 302, continue debugging hypotheses 1–2.
    - If status is no longer 302 (e.g., 200, 400, 500), Access is working; focus on Worker/OpenAI errors.
 
