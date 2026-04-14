@@ -5,19 +5,10 @@ const chatWindow = document.getElementById("chatWindow");
 const sendBtn = document.getElementById("sendBtn");
 const latestQuestion = document.getElementById("latestQuestion");
 
-// secrets.js can define window.LOCAL_CONFIG for local development only.
+// Optional local override: define window.LOCAL_CONFIG.WORKER_URL before script.js.
 const localConfig = window.LOCAL_CONFIG || {};
-const PLACEHOLDER_WORKER_URL = "https://YOUR-WORKER-URL.workers.dev";
-const WORKER_URL =
-  localConfig.WORKER_URL || PLACEHOLDER_WORKER_URL;
-
-const workerUrlIsPlaceholder = WORKER_URL === PLACEHOLDER_WORKER_URL;
-
-if (workerUrlIsPlaceholder) {
-  console.warn(
-    "Worker URL is still a placeholder. Replace secrets.js WORKER_URL with your deployed Cloudflare Worker URL.",
-  );
-}
+const DEFAULT_WORKER_URL = "https://l0realchatbot.easmit60.workers.dev";
+const WORKER_URL = localConfig.WORKER_URL || DEFAULT_WORKER_URL;
 
 // The conversation history is sent on every request to keep context.
 const conversationMessages = [];
@@ -68,13 +59,6 @@ function buildContextSystemMessage() {
 }
 
 async function testWorkerConnection() {
-  if (workerUrlIsPlaceholder) {
-    console.warn(
-      "Cannot test the Worker yet because WORKER_URL is still a placeholder.",
-    );
-    return null;
-  }
-
   const response = await fetch(WORKER_URL, {
     method: "POST",
     headers: {
@@ -94,6 +78,10 @@ async function testWorkerConnection() {
       },
     }),
   });
+
+  if (!response.ok) {
+    throw new Error(`Worker test failed with status ${response.status}`);
+  }
 
   const data = await response.json();
   console.log("Worker test response:", data);
