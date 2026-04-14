@@ -13,12 +13,13 @@ When deploying through Cloudflare, make sure your API request body (in `script.j
 
 ### Secure deployment checklist
 
-1. Paste the code from `RESOURCE_cloudflare-worker.js` into a Cloudflare Worker.
-2. Add your OpenAI API key in Cloudflare under **Variables and Secrets** as `OPENAI_API_KEY`.
-3. Deploy the Worker and copy the Worker URL that Cloudflare provides.
-4. Confirm `script.js` points to your deployed Worker URL base (`https://l0realchatbot.easmit60.workers.dev`).
-5. The app sends chat requests to `/api/chat` ( `https://l0realchatbot.easmit60.workers.dev/api/chat`).
-6. Optional: for local overrides, define `window.LOCAL_CONFIG.WORKER_URL` before loading `script.js`.
+1.Play & Practice https://github.com/easmit60-arch/Chatbot_MeshUp
+2. Paste the code from `RESOURCE_cloudflare-worker.js` into a Cloudflare Worker.
+3. Add your OpenAI API key in Cloudflare under **Variables and Secrets** as `OPENAI_API_KEY`.
+4. Deploy the Worker and copy the Worker URL that Cloudflare provides.
+5. Confirm `script.js` points to your deployed Worker URL base (`https://l0realchatbot.easmit60.workers.dev`).
+6. The app sends chat requests to `/api/chat` ( `https://l0realchatbot.easmit60.workers.dev/api/chat`).
+7. Optional: for local overrides, define `window.LOCAL_CONFIG.WORKER_URL` before loading `script.js`.
 
 ### Verify the Worker connection
 
