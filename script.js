@@ -7,10 +7,11 @@ const latestQuestion = document.getElementById("latestQuestion");
 
 // secrets.js can define window.LOCAL_CONFIG for local development only.
 const localConfig = window.LOCAL_CONFIG || {};
+const PLACEHOLDER_WORKER_URL = "https://YOUR-WORKER-URL.workers.dev";
 const WORKER_URL =
-  localConfig.WORKER_URL || "l0realchatbot.easmit60.workers.dev";
+  localConfig.WORKER_URL || PLACEHOLDER_WORKER_URL;
 
-const workerUrlIsPlaceholder = WORKER_URL.includes("l0realchatbot.easmit60.workers.dev");
+const workerUrlIsPlaceholder = WORKER_URL === PLACEHOLDER_WORKER_URL;
 
 if (workerUrlIsPlaceholder) {
   console.warn(
