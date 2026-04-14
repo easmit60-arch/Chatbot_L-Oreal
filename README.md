@@ -16,16 +16,17 @@ When deploying through Cloudflare, make sure your API request body (in `script.j
 1. Paste the code from `RESOURCE_cloudflare-worker.js` into a Cloudflare Worker.
 2. Add your OpenAI API key in Cloudflare under **Variables and Secrets** as `OPENAI_API_KEY`.
 3. Deploy the Worker and copy the Worker URL that Cloudflare provides.
-4. Put that Worker URL into `secrets.js` under `WORKER_URL` for local testing.
+4. Confirm `script.js` points to your deployed Worker URL (`https://l0realchatbot.easmit60.workers.dev`).
+5. Optional: for local overrides, define `window.LOCAL_CONFIG.WORKER_URL` before loading `script.js`.
 
 ### Verify the Worker connection
 
-After you replace `WORKER_URL` in `secrets.js` with the deployed Cloudflare Worker URL, open the browser DevTools console and run:
+Open the browser DevTools console and run:
 
 ```js
 await window.testWorkerConnection();
 ```
 
-If the URL is still a placeholder, the helper will warn you instead of sending a request.
+If the Worker is connected correctly, you will see a JSON response in the console.
 
 Enjoy building your L’Oréal beauty assistant! 💄
