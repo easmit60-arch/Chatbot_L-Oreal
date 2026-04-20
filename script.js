@@ -7,6 +7,7 @@ const selectedList = document.getElementById("selectedList");
 const selectedEmpty = document.getElementById("selectedEmpty");
 const clearSelectedBtn = document.getElementById("clearSelectedBtn");
 const generateRoutineBtn = document.getElementById("generateRoutineBtn");
+const directionToggle = document.getElementById("directionToggle");
 
 /* DOM elements: chat area */
 const chatForm = document.getElementById("chatForm");
@@ -16,6 +17,7 @@ const sendBtn = document.getElementById("sendBtn");
 const latestQuestion = document.getElementById("latestQuestion");
 
 const STORAGE_KEY = "lorealSelectedProductIds";
+const DIRECTION_STORAGE_KEY = "lorealDirectionPreference";
 
 // Optional local override: define window.LOCAL_CONFIG.WORKER_URL before script.js.
 const localConfig = window.LOCAL_CONFIG || {};
@@ -245,6 +247,49 @@ function renderSelectedProducts() {
   }
 }
 
+function applyDirection(direction) {
+  const safeDirection = direction === "rtl" ? "rtl" : "ltr";
+  document.documentElement.setAttribute("dir", safeDirection);
+  directionToggle.value = safeDirection;
+  localStorage.setItem(DIRECTION_STORAGE_KEY, safeDirection);
+}
+
+function loadDirectionPreference() {
+  const saved = localStorage.getItem(DIRECTION_STORAGE_KEY);
+  applyDirection(saved || "ltr");
+}
+
+function appendTextWithLinks(container, rawText) {
+  const text = String(rawText || "");
+  const urlPattern = /(https?:\/\/[^\s)\]]+)/g;
+  const parts = text.split(urlPattern);
+
+  for (const part of parts) {
+    if (/^https?:\/\//.test(part)) {
+      const link = document.createElement("a");
+      link.href = part;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = part;
+      container.appendChild(link);
+    } else {
+      container.appendChild(document.createTextNode(part));
+    }
+  }
+}
+
+function renderMessageContent(container, content) {
+  container.textContent = "";
+  const lines = String(content || "").split("\n");
+
+  lines.forEach((line, index) => {
+    appendTextWithLinks(container, line);
+    if (index < lines.length - 1) {
+      container.appendChild(document.createElement("br"));
+    }
+  });
+}
+
 function addMessage(role, content) {
   const messageRow = document.createElement("div");
   messageRow.classList.add("msg", role === "user" ? "user" : "ai");
@@ -258,7 +303,7 @@ function addMessage(role, content) {
 
   const text = document.createElement("p");
   text.classList.add("text");
-  text.textContent = content;
+  renderMessageContent(text, content);
 
   bubble.appendChild(label);
   bubble.appendChild(text);
@@ -477,6 +522,10 @@ function attachEventListeners() {
     renderProducts();
   });
 
+  directionToggle.addEventListener("change", (event) => {
+    applyDirection(event.target.value);
+  });
+
   clearSelectedBtn.addEventListener("click", () => {
     appState.selectedIds.clear();
     saveSelectedProducts();
@@ -490,6 +539,7 @@ function attachEventListeners() {
 
 async function initializeApp() {
   loadSelectedProducts();
+  loadDirectionPreference();
   attachEventListeners();
 
   addMessage(

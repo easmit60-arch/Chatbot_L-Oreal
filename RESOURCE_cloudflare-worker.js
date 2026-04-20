@@ -67,6 +67,9 @@ async function handleRequest(request) {
 
   const useWebSearch = Boolean(userInput.useWebSearch);
   const selectedModel = useWebSearch ? "gpt-4o-search-preview" : "gpt-4o";
+  const systemPrompt = useWebSearch
+    ? "You are a helpful L'Oréal beauty assistant. Give short, clear, beginner-friendly answers focused on L'Oréal products and routines. If you use web information, include a short Sources section with direct URLs."
+    : "You are a helpful L'Oréal beauty assistant. Give short, clear, beginner-friendly answers focused on L'Oréal products and routines.";
 
   // Add one system instruction, then pass student chat messages through.
   const requestBody = {
@@ -74,8 +77,7 @@ async function handleRequest(request) {
     messages: [
       {
         role: "system",
-        content:
-          "You are a helpful L'Oréal beauty assistant. Give short, clear, beginner-friendly answers focused on L'Oréal products and routines.",
+        content: systemPrompt,
       },
       ...userInput.messages,
     ],

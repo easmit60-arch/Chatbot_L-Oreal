@@ -25,7 +25,7 @@ When deploying through Cloudflare, make sure your API request body (in `script.j
 
 ### Secure deployment checklist
 
-1. Practice first with this reference repo: https://github.com/easmit60-arch/Chatbot_MeshUp.
+1. Practice first with this reference repo: [Chatbot_MeshUp](https://github.com/easmit60-arch/Chatbot_MeshUp).
 2. Paste the code from `RESOURCE_cloudflare-worker.js` into a Cloudflare Worker.
 3. Add your OpenAI API key in Cloudflare under **Variables and Secrets** as `OPENAI_API_KEY`.
 4. Deploy the Worker and copy the Worker URL.
@@ -85,3 +85,32 @@ If your app shows a generic error and curl tests reveal HTTP 302 redirects to Cl
 2. Wait 1–2 minutes for propagation.
 3. Re-run the curl test.
 4. If curl now returns non-302 status, refresh your browser and test the chatbot again.
+
+## 📝 Reflection Sections
+
+### Reflection 1: Prompt Writing
+
+What prompt strategy helped you get better routine outputs from the model?
+
+Answer:
+
+- I improved output quality by giving the model explicit structure, product constraints, and output format instructions.
+- I included the selected product JSON so the model had concrete context.
+- I requested a clear response format (AM steps, PM steps, reasoning, and a safety note) so the answer stayed focused.
+
+### Reflection 2: Overcoming Roadblocks
+
+What technical roadblock did you hit, and how did you solve it?
+
+Answer:
+
+- One challenge was keeping product selection, visual state, and selected list in sync.
+- I solved it by using one source of truth (`selectedIds`), then re-rendering both the product grid and selected list after every selection change.
+- I also used `localStorage` so the selected list persisted after reload and remained reliable.
+
+### Reflection 3: LinkedIn Post Draft
+
+Share a short professional summary of what you built.
+
+Draft:
+I built a Product-Aware L'Oréal Routine Builder chatbot using JavaScript, a Cloudflare Worker, and OpenAI. Users can browse real products, filter by category and keyword, select products, generate a personalized routine, and ask follow-up questions with conversation memory. I also implemented localStorage persistence, optional web search mode with source links, and responsive UI support including RTL layout handling.

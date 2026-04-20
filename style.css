@@ -73,6 +73,13 @@ main {
   box-shadow: 0 10px 24px rgba(16, 17, 20, 0.06);
 }
 
+.products-section,
+.selected-section,
+.chatbox {
+  display: flex;
+  flex-direction: column;
+}
+
 .builder-controls {
   display: grid;
   gap: 12px;
@@ -140,6 +147,20 @@ button:focus-visible,
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
+  max-height: 430px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.product-grid::-webkit-scrollbar,
+.selected-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.product-grid::-webkit-scrollbar-thumb,
+.selected-list::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--loreal-gold) 55%, #c5c5c5);
+  border-radius: 999px;
 }
 
 .product-card {
@@ -240,6 +261,9 @@ button:focus-visible,
   list-style: none;
   display: grid;
   gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 6px;
 }
 
 .selected-item {
@@ -367,6 +391,16 @@ button:focus-visible,
   line-height: 1.4;
 }
 
+.bubble .text a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.msg.ai .bubble .text a {
+  color: #00437a;
+}
+
 .chat-form {
   display: flex;
   gap: 10px;
@@ -414,9 +448,35 @@ button:focus-visible,
   overflow: hidden;
 }
 
+[dir="rtl"] .site-header,
+[dir="rtl"] .builder-controls,
+[dir="rtl"] .products-section,
+[dir="rtl"] .selected-section,
+[dir="rtl"] .chatbox,
+[dir="rtl"] .site-footer {
+  text-align: right;
+}
+
+[dir="rtl"] .selected-header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .selected-item {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .msg.user {
+  justify-content: flex-start;
+}
+
+[dir="rtl"] .msg.ai {
+  justify-content: flex-end;
+}
+
 @media (max-width: 1000px) {
   .product-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-height: 560px;
   }
 }
 
@@ -427,6 +487,7 @@ button:focus-visible,
 
   .product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: 760px;
   }
 
   .site-title {
@@ -441,6 +502,7 @@ button:focus-visible,
 
   .product-grid {
     grid-template-columns: 1fr;
+    max-height: 1260px;
   }
 
   .selected-header {
