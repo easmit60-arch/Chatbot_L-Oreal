@@ -224,6 +224,106 @@ body {
   outline-offset: 2px;
 }
 
+/* featured projects */
+.featured-projects {
+  margin: 20px 0 40px;
+  padding: 20px 18px;
+  border: 1px solid rgba(201, 164, 74, 0.24);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(2px);
+}
+
+.section-heading {
+  margin-bottom: 16px;
+}
+
+.section-kicker {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--loreal-gray-600);
+  margin-bottom: 6px;
+}
+
+#featuredProjectsTitle {
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.project-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--loreal-white);
+  border: 1px solid var(--loreal-gray-300);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 8px 16px rgba(17, 17, 17, 0.06);
+}
+
+.project-image {
+  width: 100%;
+  height: 148px;
+  border-radius: 10px;
+  border: 1px solid var(--loreal-gray-300);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.project-image-routine {
+  background-image: url("https://cdn.jsdelivr.net/gh/GCA-Classroom/09-loreal-images/img/CeraVe_Foaming_Facial_Cleanser.png");
+}
+
+.project-image-shade {
+  background-image: url("https://cdn.jsdelivr.net/gh/GCA-Classroom/09-loreal-images/img/CeraVe_Hydrating_Facial_Cleanser.png");
+}
+
+.project-image-hair {
+  background-image: url("https://cdn.jsdelivr.net/gh/GCA-Classroom/09-loreal-images/img/CeraVe_Moisturizing_Cream.png");
+}
+
+.project-image-makeup {
+  background-image: url("https://cdn.jsdelivr.net/gh/GCA-Classroom/09-loreal-images/img/CeraVe_AM_Facial_Moisturizing_Lotion_SPF_30.jpg");
+}
+
+.project-image-fragrance {
+  background-image: url("https://cdn.jsdelivr.net/gh/GCA-Classroom/09-loreal-images/img/CeraVe_PM_Facial_Moisturizing_Lotion.png");
+}
+
+.project-image-budget {
+  background-image: url("https://cdn.jsdelivr.net/gh/GCA-Classroom/09-loreal-images/img/CeraVe_Resurfacing_Retinol_Serum.png");
+}
+
+.project-title {
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.project-description {
+  font-size: 14px;
+  color: var(--loreal-gray-600);
+  line-height: 1.45;
+  flex-grow: 1;
+}
+
+.project-link {
+  color: var(--loreal-black);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.project-link:hover {
+  color: #7f6a34;
+}
+
 /* visually hidden */
 .visually-hidden {
   position: absolute;
@@ -284,5 +384,57 @@ body {
 
   .bubble {
     max-width: 88%;
+  }
+
+  .featured-projects {
+    margin: 14px 0 30px;
+    padding: 14px;
+  }
+
+  #featuredProjectsTitle {
+    font-size: 21px;
+  }
+
+  .projects-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .project-image {
+    height: 134px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-wrapper {
+    width: 96%;
+  }
+
+  .chat-form {
+    gap: 8px;
+  }
+
+  .chat-form input {
+    font-size: 15px;
+    padding: 12px;
+  }
+
+  .chat-form button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .chat-window {
+    height: 330px;
+    padding: 12px;
+    font-size: 15px;
+  }
+
+  .projects-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project-image {
+    height: 160px;
   }
 }
