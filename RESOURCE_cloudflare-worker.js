@@ -65,9 +65,12 @@ async function handleRequest(request) {
     );
   }
 
+  const useWebSearch = Boolean(userInput.useWebSearch);
+  const selectedModel = useWebSearch ? "gpt-4o-search-preview" : "gpt-4o";
+
   // Add one system instruction, then pass student chat messages through.
   const requestBody = {
-    model: "gpt-4o",
+    model: selectedModel,
     messages: [
       {
         role: "system",
@@ -77,6 +80,12 @@ async function handleRequest(request) {
       ...userInput.messages,
     ],
   };
+
+  if (useWebSearch) {
+    requestBody.web_search_options = {
+      search_context_size: "medium",
+    };
+  }
 
   const openAiResponse = await fetch(
     "https://api.openai.com/v1/chat/completions",

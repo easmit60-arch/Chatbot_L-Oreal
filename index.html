@@ -26,13 +26,74 @@
         </p>
       </header>
 
-      <!------- Chat Area ------->
+      <!------- Routine Builder ------->
       <main>
-        <section class="chatbox">
+        <section class="builder-controls">
+          <div class="control-group">
+            <label for="categoryFilter">Filter by category</label>
+            <select id="categoryFilter" name="categoryFilter">
+              <option value="all">All categories</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="productSearch">Search products</label>
+            <input
+              id="productSearch"
+              name="productSearch"
+              type="search"
+              placeholder="Search by name, brand, or keyword"
+              autocomplete="off"
+            />
+          </div>
+
+          <p id="productsCount" class="products-count" aria-live="polite">
+            Loading products...
+          </p>
+        </section>
+
+        <section class="products-section" aria-labelledby="productsTitle">
+          <div class="section-heading">
+            <p class="section-kicker">Browse Products</p>
+            <h2 id="productsTitle">L'Oreal Product Library</h2>
+          </div>
+
+          <div id="productGrid" class="product-grid" aria-live="polite">
+            <!-- product cards injected by JavaScript -->
+          </div>
+        </section>
+
+        <section class="selected-section" aria-labelledby="selectedTitle">
+          <div class="selected-header">
+            <div>
+              <p class="section-kicker">Your Picks</p>
+              <h2 id="selectedTitle">Selected Products</h2>
+            </div>
+            <button id="clearSelectedBtn" type="button" class="clear-btn">
+              Clear all
+            </button>
+          </div>
+
+          <ul id="selectedList" class="selected-list" aria-live="polite"></ul>
+          <p id="selectedEmpty" class="selected-empty">
+            No products selected yet. Click any product card to add it.
+          </p>
+
+          <button id="generateRoutineBtn" type="button" class="routine-btn">
+            Generate Routine
+          </button>
+        </section>
+
+        <section class="chatbox" aria-labelledby="chatTitle">
+          <div class="section-heading">
+            <p class="section-kicker">Beauty Advisor</p>
+            <h2 id="chatTitle">Routine Chat</h2>
+          </div>
+
           <div class="latest-question-box" aria-live="polite">
             <p class="latest-question-label">Latest question</p>
             <p id="latestQuestion" class="latest-question-text">
-              Your latest question will appear here.
+              Generate a routine, then ask follow-up questions here.
             </p>
           </div>
 
@@ -55,132 +116,6 @@
               <span class="visually-hidden">Send</span>
             </button>
           </form>
-        </section>
-
-        <section
-          class="featured-projects"
-          aria-labelledby="featuredProjectsTitle"
-        >
-          <div class="section-heading">
-            <p class="section-kicker">Student Showcase</p>
-            <h2 id="featuredProjectsTitle">Featured Projects</h2>
-          </div>
-
-          <div class="projects-grid">
-            <article class="project-card">
-              <div
-                class="project-image project-image-routine"
-                role="img"
-                aria-label="CeraVe Foaming Facial Cleanser product bottle"
-              ></div>
-              <h3 class="project-title">CeraVe Foaming Facial Cleanser</h3>
-              <p class="project-description">
-                Gentle gel cleanser with ceramides and hyaluronic acid designed
-                to remove oil and impurities for normal to oily skin.
-              </p>
-              <a
-                href="#"
-                class="project-link"
-                aria-label="View live site for CeraVe Foaming Facial Cleanser"
-                >View live site</a
-              >
-            </article>
-
-            <article class="project-card">
-              <div
-                class="project-image project-image-shade"
-                role="img"
-                aria-label="CeraVe Hydrating Facial Cleanser product bottle"
-              ></div>
-              <h3 class="project-title">CeraVe Hydrating Facial Cleanser</h3>
-              <p class="project-description">
-                A lotion-like cleanser made for normal to dry skin that cleans
-                without stripping moisture from the skin barrier.
-              </p>
-              <a
-                href="#"
-                class="project-link"
-                aria-label="View live site for CeraVe Hydrating Facial Cleanser"
-                >View live site</a
-              >
-            </article>
-
-            <article class="project-card">
-              <div
-                class="project-image project-image-hair"
-                role="img"
-                aria-label="CeraVe Moisturizing Cream product jar"
-              ></div>
-              <h3 class="project-title">CeraVe Moisturizing Cream</h3>
-              <p class="project-description">
-                Rich barrier-support cream with three ceramides and long-lasting
-                hydration for dry to very dry skin.
-              </p>
-              <a
-                href="#"
-                class="project-link"
-                aria-label="View live site for CeraVe Moisturizing Cream"
-                >View live site</a
-              >
-            </article>
-
-            <article class="project-card">
-              <div
-                class="project-image project-image-makeup"
-                role="img"
-                aria-label="CeraVe AM Facial Moisturizing Lotion SPF 30 bottle"
-              ></div>
-              <h3 class="project-title">CeraVe AM Lotion SPF 30</h3>
-              <p class="project-description">
-                Lightweight daytime moisturizer with broad-spectrum SPF 30 plus
-                ceramides, niacinamide, and hyaluronic acid.
-              </p>
-              <a
-                href="#"
-                class="project-link"
-                aria-label="View live site for CeraVe AM Lotion SPF 30"
-                >View live site</a
-              >
-            </article>
-
-            <article class="project-card">
-              <div
-                class="project-image project-image-fragrance"
-                role="img"
-                aria-label="CeraVe PM Facial Moisturizing Lotion bottle"
-              ></div>
-              <h3 class="project-title">CeraVe PM Facial Lotion</h3>
-              <p class="project-description">
-                Oil-free evening moisturizer that helps restore the skin barrier
-                overnight while keeping hydration light and comfortable.
-              </p>
-              <a
-                href="#"
-                class="project-link"
-                aria-label="View live site for CeraVe PM Facial Lotion"
-                >View live site</a
-              >
-            </article>
-
-            <article class="project-card">
-              <div
-                class="project-image project-image-budget"
-                role="img"
-                aria-label="CeraVe Resurfacing Retinol Serum bottle"
-              ></div>
-              <h3 class="project-title">CeraVe Resurfacing Retinol Serum</h3>
-              <p class="project-description">
-                Encapsulated retinol serum that smooths skin texture and helps
-                visibly fade post-acne marks over time.
-              </p>
-              <a
-                href="#"
-                class="project-link"
-                aria-label="View live site for CeraVe Resurfacing Retinol Serum"
-                >View live site</a
-              >
-            </article>
-          </div>
         </section>
       </main>
 

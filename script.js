@@ -1,9 +1,21 @@
-/* DOM elements */
+/* DOM elements: builder controls */
+const categoryFilter = document.getElementById("categoryFilter");
+const productSearch = document.getElementById("productSearch");
+const productsCount = document.getElementById("productsCount");
+const productGrid = document.getElementById("productGrid");
+const selectedList = document.getElementById("selectedList");
+const selectedEmpty = document.getElementById("selectedEmpty");
+const clearSelectedBtn = document.getElementById("clearSelectedBtn");
+const generateRoutineBtn = document.getElementById("generateRoutineBtn");
+
+/* DOM elements: chat area */
 const chatForm = document.getElementById("chatForm");
 const userInput = document.getElementById("userInput");
 const chatWindow = document.getElementById("chatWindow");
 const sendBtn = document.getElementById("sendBtn");
 const latestQuestion = document.getElementById("latestQuestion");
+
+const STORAGE_KEY = "lorealSelectedProductIds";
 
 // Optional local override: define window.LOCAL_CONFIG.WORKER_URL before script.js.
 const localConfig = window.LOCAL_CONFIG || {};
@@ -23,106 +35,215 @@ const WORKER_URL = resolveChatEndpoint(
   localConfig.WORKER_URL || DEFAULT_WORKER_URL,
 );
 
-// The conversation history is sent on every request to keep context.
-const conversationMessages = [];
-
-// Store extra context so the chatbot can handle multi-turn conversations naturally.
-const userContext = {
-  name: "",
-  pastQuestions: [],
+const appState = {
+  products: [],
+  selectedIds: new Set(),
+  activeCategory: "all",
+  searchText: "",
+  routineGenerated: false,
 };
 
-function extractName(text) {
-  const patterns = [
-    /my name is\s+([a-z][a-z\s'-]{1,40})/i,
-    /i am\s+([a-z][a-z\s'-]{1,40})/i,
-    /i'm\s+([a-z][a-z\s'-]{1,40})/i,
-  ];
+// Full message history for follow-up chat after routine generation.
+let conversationMessages = [];
 
-  for (const pattern of patterns) {
-    const match = text.match(pattern);
-    if (match && match[1]) {
-      return match[1].trim();
+function normalizeText(text) {
+  return String(text || "").toLowerCase();
+}
+
+function getSelectedProducts() {
+  return appState.products.filter((product) =>
+    appState.selectedIds.has(product.id),
+  );
+}
+
+function saveSelectedProducts() {
+  const selectedIdArray = [...appState.selectedIds];
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(selectedIdArray));
+}
+
+function loadSelectedProducts() {
+  try {
+    const rawValue = localStorage.getItem(STORAGE_KEY);
+    if (!rawValue) {
+      return;
+    }
+
+    const parsedIds = JSON.parse(rawValue);
+    if (!Array.isArray(parsedIds)) {
+      return;
+    }
+
+    for (const id of parsedIds) {
+      if (Number.isInteger(id)) {
+        appState.selectedIds.add(id);
+      }
+    }
+  } catch (error) {
+    console.error("Could not load selected products from localStorage", error);
+  }
+}
+
+function renderCategoryOptions() {
+  const uniqueCategories = [
+    ...new Set(appState.products.map((product) => product.category)),
+  ].sort((a, b) => a.localeCompare(b));
+
+  categoryFilter.innerHTML = '<option value="all">All categories</option>';
+
+  for (const category of uniqueCategories) {
+    const option = document.createElement("option");
+    option.value = category;
+    option.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+    categoryFilter.appendChild(option);
+  }
+}
+
+function createProductCard(product) {
+  const isSelected = appState.selectedIds.has(product.id);
+
+  const card = document.createElement("article");
+  card.className = `product-card${isSelected ? " selected" : ""}`;
+  card.tabIndex = 0;
+  card.setAttribute("role", "button");
+  card.setAttribute("aria-pressed", String(isSelected));
+  card.setAttribute("aria-label", `Select ${product.brand} ${product.name}`);
+
+  const image = document.createElement("img");
+  image.className = "product-image";
+  image.src = product.image;
+  image.alt = `${product.brand} ${product.name}`;
+
+  const name = document.createElement("h3");
+  name.className = "product-name";
+  name.textContent = product.name;
+
+  const meta = document.createElement("p");
+  meta.className = "product-meta";
+  meta.textContent = `${product.brand} | ${product.category}`;
+
+  const toggleDescriptionBtn = document.createElement("button");
+  toggleDescriptionBtn.type = "button";
+  toggleDescriptionBtn.className = "desc-toggle";
+  toggleDescriptionBtn.textContent = "Show description";
+  toggleDescriptionBtn.setAttribute("aria-expanded", "false");
+
+  const description = document.createElement("p");
+  description.className = "product-description";
+  description.hidden = true;
+  description.textContent = product.description;
+
+  toggleDescriptionBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const isExpanded =
+      toggleDescriptionBtn.getAttribute("aria-expanded") === "true";
+    toggleDescriptionBtn.setAttribute("aria-expanded", String(!isExpanded));
+    toggleDescriptionBtn.textContent = isExpanded
+      ? "Show description"
+      : "Hide description";
+    description.hidden = isExpanded;
+  });
+
+  function handleSelectionToggle() {
+    if (appState.selectedIds.has(product.id)) {
+      appState.selectedIds.delete(product.id);
+    } else {
+      appState.selectedIds.add(product.id);
+    }
+
+    saveSelectedProducts();
+    renderProducts();
+    renderSelectedProducts();
+  }
+
+  card.addEventListener("click", handleSelectionToggle);
+
+  card.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleSelectionToggle();
+    }
+  });
+
+  card.appendChild(image);
+  card.appendChild(name);
+  card.appendChild(meta);
+  card.appendChild(toggleDescriptionBtn);
+  card.appendChild(description);
+
+  return card;
+}
+
+function renderProducts() {
+  const filteredProducts = appState.products.filter((product) => {
+    const matchesCategory =
+      appState.activeCategory === "all" ||
+      product.category === appState.activeCategory;
+
+    const searchTerm = normalizeText(appState.searchText);
+    const searchable = normalizeText(
+      `${product.name} ${product.brand} ${product.category} ${product.description}`,
+    );
+    const matchesSearch = !searchTerm || searchable.includes(searchTerm);
+
+    return matchesCategory && matchesSearch;
+  });
+
+  productGrid.innerHTML = "";
+
+  if (filteredProducts.length === 0) {
+    const emptyState = document.createElement("p");
+    emptyState.className = "empty-grid";
+    emptyState.textContent = "No products match your current filters.";
+    productGrid.appendChild(emptyState);
+  } else {
+    for (const product of filteredProducts) {
+      productGrid.appendChild(createProductCard(product));
     }
   }
 
-  return "";
+  productsCount.textContent = `Showing ${filteredProducts.length} of ${appState.products.length} products`;
 }
 
-function updateConversationContext(questionText) {
-  const possibleName = extractName(questionText);
+function renderSelectedProducts() {
+  const selectedProducts = getSelectedProducts();
+  selectedList.innerHTML = "";
 
-  if (possibleName) {
-    userContext.name = possibleName;
+  if (selectedProducts.length === 0) {
+    selectedEmpty.hidden = false;
+    clearSelectedBtn.disabled = true;
+    generateRoutineBtn.disabled = true;
+    return;
   }
 
-  userContext.pastQuestions.push(questionText);
+  selectedEmpty.hidden = true;
+  clearSelectedBtn.disabled = false;
+  generateRoutineBtn.disabled = false;
 
-  // Keep only the latest 8 questions to limit request size.
-  if (userContext.pastQuestions.length > 8) {
-    userContext.pastQuestions.shift();
+  for (const product of selectedProducts) {
+    const item = document.createElement("li");
+    item.className = "selected-item";
+
+    const text = document.createElement("p");
+    text.className = "selected-item-text";
+    text.textContent = `${product.brand} - ${product.name}`;
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "remove-selected-btn";
+    removeButton.textContent = "Remove";
+
+    removeButton.addEventListener("click", () => {
+      appState.selectedIds.delete(product.id);
+      saveSelectedProducts();
+      renderProducts();
+      renderSelectedProducts();
+    });
+
+    item.appendChild(text);
+    item.appendChild(removeButton);
+    selectedList.appendChild(item);
   }
 }
-
-function buildContextSystemMessage() {
-  return {
-    name: userContext.name,
-    pastQuestions: [...userContext.pastQuestions],
-  };
-}
-
-function getFriendlyErrorMessage(error, response) {
-  const isAccessProtected =
-    response?.status === 302 ||
-    response?.url?.includes("cloudflareaccess.com") ||
-    error?.message?.includes("status 302");
-
-  if (isAccessProtected) {
-    return "Your Worker is behind Cloudflare Access, so this page cannot call it yet. Sign in to Access or use an unprotected Worker URL in secrets.js.";
-  }
-
-  if (response?.status === 401 || response?.status === 403) {
-    return "The Worker request was blocked (401/403). Check your Worker access policy and deployment settings.";
-  }
-
-  if (response?.status === 404) {
-    return "The Worker endpoint was not found. Confirm your URL and that /api/chat is deployed.";
-  }
-
-  return "Sorry, I hit an error. Check your Worker URL and try again.";
-}
-
-async function testWorkerConnection() {
-  const response = await fetch(WORKER_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      messages: [
-        {
-          role: "user",
-          content:
-            "Reply with a one-sentence hello so I can confirm the Worker is live.",
-        },
-      ],
-      context: {
-        name: "",
-        pastQuestions: [],
-      },
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Worker test failed with status ${response.status}`);
-  }
-
-  const data = await response.json();
-  console.log("Worker test response:", data);
-  return data;
-}
-
-window.testWorkerConnection = testWorkerConnection;
 
 function addMessage(role, content) {
   const messageRow = document.createElement("div");
@@ -146,13 +267,130 @@ function addMessage(role, content) {
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
-addMessage(
-  "assistant",
-  "Welcome. Share your beauty goals, and I can help with L'Oréal skincare, haircare, makeup, and fragrance recommendations.",
-);
+function getFriendlyErrorMessage(error, response) {
+  const isAccessProtected =
+    response?.status === 302 ||
+    response?.url?.includes("cloudflareaccess.com") ||
+    error?.message?.includes("status 302");
 
-/* Handle form submit */
-chatForm.addEventListener("submit", async (event) => {
+  if (isAccessProtected) {
+    return "Your Worker is behind Cloudflare Access. Sign in to Access first, or use an unprotected Worker URL in secrets.js.";
+  }
+
+  if (response?.status === 401 || response?.status === 403) {
+    return "The Worker request was blocked (401/403). Check your Worker access policy and deployment settings.";
+  }
+
+  if (response?.status === 404) {
+    return "The Worker endpoint was not found. Confirm your URL and that /api/chat is deployed.";
+  }
+
+  return "Sorry, I hit an error. Check your Worker URL and try again.";
+}
+
+async function requestAssistantReply(
+  messages,
+  selectedProducts,
+  useWebSearch = false,
+) {
+  const response = await fetch(WORKER_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      messages,
+      context: {
+        selectedProducts,
+        routineGenerated: appState.routineGenerated,
+      },
+      useWebSearch,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+
+  const data = await response.json();
+  const assistantReply = data.choices?.[0]?.message?.content;
+
+  if (!assistantReply) {
+    throw new Error("No assistant message returned from API.");
+  }
+
+  return assistantReply;
+}
+
+async function generateRoutineFromSelection() {
+  const selectedProducts = getSelectedProducts();
+
+  if (selectedProducts.length === 0) {
+    addMessage(
+      "assistant",
+      "Please select at least one product before generating a routine.",
+    );
+    return;
+  }
+
+  generateRoutineBtn.disabled = true;
+  generateRoutineBtn.textContent = "Generating...";
+
+  const selectedJson = selectedProducts.map((product) => ({
+    name: product.name,
+    brand: product.brand,
+    category: product.category,
+    description: product.description,
+  }));
+
+  const systemPrompt =
+    "You are a helpful L'Oreal routine advisor. Use only the selected products provided by the user. Be transparent that you are an AI helper, not a dermatologist or chemist. Keep answers inclusive and practical.";
+
+  const userPrompt = `Build a personalized routine using only these selected products:\n${JSON.stringify(
+    selectedJson,
+    null,
+    2,
+  )}\n\nReturn: 1) morning steps, 2) evening steps, 3) why each product was placed there, and 4) one safety tip.`;
+
+  const baseMessages = [
+    { role: "system", content: systemPrompt },
+    { role: "user", content: userPrompt },
+  ];
+
+  try {
+    const assistantReply = await requestAssistantReply(
+      baseMessages,
+      selectedJson,
+    );
+
+    appState.routineGenerated = true;
+    conversationMessages = [
+      ...baseMessages,
+      { role: "assistant", content: assistantReply },
+    ];
+
+    addMessage("assistant", assistantReply);
+    latestQuestion.textContent =
+      "Generated personalized routine from selected products.";
+  } catch (error) {
+    let response;
+
+    if (error.message.includes("status")) {
+      const statusMatch = error.message.match(/status\s+(\d{3})/i);
+      if (statusMatch) {
+        response = { status: Number(statusMatch[1]) };
+      }
+    }
+
+    addMessage("assistant", getFriendlyErrorMessage(error, response));
+    console.error(error);
+  } finally {
+    generateRoutineBtn.textContent = "Generate Routine";
+    generateRoutineBtn.disabled = getSelectedProducts().length === 0;
+  }
+}
+
+async function handleFollowUpQuestion(event) {
   event.preventDefault();
 
   const text = userInput.value.trim();
@@ -162,42 +400,39 @@ chatForm.addEventListener("submit", async (event) => {
 
   addMessage("user", text);
   latestQuestion.textContent = text;
-  updateConversationContext(text);
   userInput.value = "";
+
+  if (!appState.routineGenerated) {
+    addMessage(
+      "assistant",
+      "Generate a routine first, then I can answer follow-up questions about your routine and related beauty topics.",
+    );
+    return;
+  }
+
   sendBtn.disabled = true;
+
+  const selectedJson = getSelectedProducts().map((product) => ({
+    name: product.name,
+    brand: product.brand,
+    category: product.category,
+    description: product.description,
+  }));
 
   conversationMessages.push({ role: "user", content: text });
 
   try {
-    const response = await fetch(WORKER_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        messages: conversationMessages,
-        context: buildContextSystemMessage(),
-      }),
-    });
+    const assistantReply = await requestAssistantReply(
+      conversationMessages,
+      selectedJson,
+      true,
+    );
 
-    if (!response.ok) {
-      throw new Error(`Request failed with status ${response.status}`);
-    }
-
-    const data = await response.json();
-    const assistantReply = data.choices?.[0]?.message?.content;
-
-    if (!assistantReply) {
-      throw new Error("No assistant message returned from API.");
-    }
-
-    addMessage("assistant", assistantReply);
     conversationMessages.push({ role: "assistant", content: assistantReply });
+    addMessage("assistant", assistantReply);
   } catch (error) {
     let response;
 
-    // If fetch resolved, response details are in the thrown status message.
-    // If fetch failed before getting a response, keep response undefined.
     if (error.message.includes("status")) {
       const statusMatch = error.message.match(/status\s+(\d{3})/i);
       if (statusMatch) {
@@ -211,4 +446,67 @@ chatForm.addEventListener("submit", async (event) => {
     sendBtn.disabled = false;
     userInput.focus();
   }
-});
+}
+
+async function loadProducts() {
+  const response = await fetch("products.json");
+
+  if (!response.ok) {
+    throw new Error(`Could not load products.json (${response.status})`);
+  }
+
+  const data = await response.json();
+  appState.products = data.products || [];
+
+  // Remove IDs from storage that do not exist in the current product list.
+  const validIds = new Set(appState.products.map((product) => product.id));
+  appState.selectedIds = new Set(
+    [...appState.selectedIds].filter((id) => validIds.has(id)),
+  );
+  saveSelectedProducts();
+}
+
+function attachEventListeners() {
+  categoryFilter.addEventListener("change", (event) => {
+    appState.activeCategory = event.target.value;
+    renderProducts();
+  });
+
+  productSearch.addEventListener("input", (event) => {
+    appState.searchText = event.target.value;
+    renderProducts();
+  });
+
+  clearSelectedBtn.addEventListener("click", () => {
+    appState.selectedIds.clear();
+    saveSelectedProducts();
+    renderProducts();
+    renderSelectedProducts();
+  });
+
+  generateRoutineBtn.addEventListener("click", generateRoutineFromSelection);
+  chatForm.addEventListener("submit", handleFollowUpQuestion);
+}
+
+async function initializeApp() {
+  loadSelectedProducts();
+  attachEventListeners();
+
+  addMessage(
+    "assistant",
+    "Welcome. Choose products, click Generate Routine, then ask follow-up questions about your routine.",
+  );
+
+  try {
+    await loadProducts();
+    renderCategoryOptions();
+    renderProducts();
+    renderSelectedProducts();
+  } catch (error) {
+    console.error(error);
+    productsCount.textContent =
+      "Could not load products. Check your files and try again.";
+  }
+}
+
+initializeApp();
