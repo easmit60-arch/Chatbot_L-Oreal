@@ -12,6 +12,72 @@
   --ink-soft: #565a66;
   --line-soft: #ded7c8;
   --panel: #fff9ef;
+  /* Neon/commerce/trauma-informed variables */
+  --neon-rouge: #ff006e;
+  --neon-cyan: #00d9ff;
+  --blue-black: #0a1128;
+  --text-light: #e0f0ff;
+  --glow-shadow:
+    0 0 10px rgba(0, 217, 255, 0.6), 0 0 20px rgba(255, 0, 110, 0.4);
+  --commerce-accent: #dc3304;
+  --consent-green: #1ecb7b;
+  --safety-yellow: #ffe066;
+  --trauma-pink: #f7c6d9;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --commerce-accent: #dc3304;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --commerce-accent: #dc3304;
+  }
+}
+
+.commerce-accent {
+  color: var(--commerce-accent) !important;
+}
+
+/* Trauma-informed, consent, and safety cues */
+.trauma-informed {
+  background: var(--trauma-pink, #f7c6d9);
+  color: var(--loreal-black);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 8px 0;
+}
+.consent-cue {
+  background: var(--consent-green, #1ecb7b);
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-weight: 600;
+  margin: 6px 0;
+}
+.safety-cue {
+  background: var(--safety-yellow, #ffe066);
+  color: var(--loreal-black);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-weight: 600;
+  margin: 6px 0;
+}
+
+/* Neon/glow effect for opt-in tools or highlights */
+.neon-glow {
+  color: var(--neon-cyan);
+  text-shadow: var(--glow-shadow);
+  font-weight: bold;
+}
+.neon-rouge {
+  color: var(--neon-rouge);
+  text-shadow:
+    0 0 8px var(--neon-rouge),
+    0 0 16px var(--neon-rouge, #ff006e);
+  font-weight: bold;
 }
 
 body {

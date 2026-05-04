@@ -1,144 +1,448 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>L'Oreal Beauty Assistant</title>
-    <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="style.css" />
-  </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PI_AI - Trauma-Informed Support</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <body>
-    <div class="page-wrapper">
-      <!------- Header / Branding ------->
-      <header class="site-header">
-        <img src="img/loreal-logo.png" alt="L'Oreal logo" class="brand-logo" />
-        <h1 class="site-title">L'Oreal Beauty Assistant</h1>
-        <p class="site-tagline">
-          Personalized routines and product guidance from the L'Oréal ecosystem.
-        </p>
-      </header>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
 
-      <!------- Routine Builder ------->
-      <main>
-        <section class="builder-controls">
-          <div class="control-group">
-            <label for="categoryFilter">Filter by category</label>
-            <select id="categoryFilter" name="categoryFilter">
-              <option value="all">All categories</option>
-            </select>
-          </div>
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+            overflow: hidden;
+        }
 
-          <div class="control-group">
-            <label for="productSearch">Search products</label>
-            <input
-              id="productSearch"
-              name="productSearch"
-              type="search"
-              placeholder="Search by name, brand, or keyword"
-              autocomplete="off"
-            />
-          </div>
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
 
-          <div class="control-group">
-            <label for="directionToggle">Layout direction</label>
-            <select id="directionToggle" name="directionToggle">
-              <option value="ltr">LTR</option>
-              <option value="rtl">RTL</option>
-            </select>
-          </div>
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
 
-          <p id="productsCount" class="products-count" aria-live="polite">
-            Loading products...
-          </p>
-        </section>
+        .header p {
+            font-size: 14px;
+            opacity: 0.95;
+            max-width: 600px;
+            margin: 0 auto;
+        }
 
-        <section class="products-section" aria-labelledby="productsTitle">
-          <div class="section-heading">
-            <p class="section-kicker">Browse Products</p>
-            <h2 id="productsTitle">L'Oreal Product Library</h2>
-          </div>
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-          <div id="productGrid" class="product-grid" aria-live="polite">
-            <!-- product cards injected by JavaScript -->
-          </div>
-        </section>
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
 
-        <section class="selected-section" aria-labelledby="selectedTitle">
-          <div class="selected-header">
-            <div>
-              <p class="section-kicker">Your Picks</p>
-              <h2 id="selectedTitle">Selected Products</h2>
+        .message {
+            display: flex;
+            gap: 12px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        .message.assistant .message-content {
+            background: #f0f0f5;
+            color: #333;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message.system .message-content {
+            background: #fffbea;
+            color: #d4a574;
+            border-left: 3px solid #d4a574;
+        }
+
+        .input-area {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            background: #fafafa;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"],
+        textarea {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: none;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .sherlock-section {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+
+        .sherlock-section label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .sherlock-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .sherlock-input-group input {
+            flex: 1;
+        }
+
+        .sherlock-input-group button {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .sherlock-input-group button:hover:not(:disabled) {
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .status {
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+
+        .status.loading {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .status.error {
+            color: #f5576c;
+            background: #fff5f5;
+            border-radius: 4px;
+            padding: 10px;
+        }
+
+        .messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .messages::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .loading-dots {
+            display: inline-block;
+        }
+
+        .loading-dots span {
+            animation: blink 1.4s infinite;
+        }
+
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes blink {
+            0%, 60%, 100% { opacity: 0.5; }
+            30% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌸 PI_AI</h1>
+            <p>Trauma-informed support tool with optional technical utilities. Your pace, your choices.</p>
+        </div>
+
+        <div class="chat-area">
+            <div id="messages" class="messages"></div>
+        </div>
+
+        <div class="input-area">
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="chat-input" 
+                    placeholder="Type your message here... (or use /sherlock for username checks)"
+                    autocomplete="off"
+                >
+                <button id="send-btn">Send</button>
             </div>
-            <button id="clearSelectedBtn" type="button" class="clear-btn">
-              Clear all
-            </button>
-          </div>
 
-          <ul id="selectedList" class="selected-list" aria-live="polite"></ul>
-          <p id="selectedEmpty" class="selected-empty">
-            No products selected yet. Click any product card to add it.
-          </p>
+            <div class="sherlock-section">
+                <label>🔍 Sherlock - Username Reconnaissance</label>
+                <div class="sherlock-input-group">
+                    <input 
+                        type="text" 
+                        id="sherlock-input" 
+                        placeholder="Enter usernames (comma-separated) to check across platforms"
+                        autocomplete="off"
+                    >
+                    <button id="sherlock-btn">Search</button>
+                </div>
+                <p style="font-size: 11px; color: #999; margin-top: 6px;">
+                    💡 Tip: For your own safety verification only. Never use without explicit consent.
+                </p>
+            </div>
 
-          <button id="generateRoutineBtn" type="button" class="routine-btn">
-            Generate Routine
-          </button>
-        </section>
-
-        <section class="chatbox" aria-labelledby="chatTitle">
-          <div class="section-heading">
-            <p class="section-kicker">Beauty Advisor</p>
-            <h2 id="chatTitle">Routine Chat</h2>
-          </div>
-
-          <div class="latest-question-box" aria-live="polite">
-            <p class="latest-question-label">Latest question</p>
-            <p id="latestQuestion" class="latest-question-text">
-              Generate a routine, then ask follow-up questions here.
-            </p>
-          </div>
-
-          <div id="chatWindow" class="chat-window">
-            <!-- messages will be appended here via JS -->
-          </div>
-
-          <form id="chatForm" class="chat-form">
-            <label for="userInput" class="visually-hidden">Message</label>
-            <input
-              id="userInput"
-              name="userInput"
-              type="text"
-              placeholder="Ask me about products or routines…"
-              autocomplete="off"
-              required
-            />
-            <button type="submit" id="sendBtn">
-              <span class="material-icons">send</span>
-              <span class="visually-hidden">Send</span>
-            </button>
-          </form>
-        </section>
-      </main>
-
-      <!------- Footer Links ------->
-      <footer class="site-footer">
-        <p>&copy; 2026 L'Oréal Chatbot Project.</p>
-        <nav>
-          <a href="#" aria-label="Privacy policy link">Privacy Policy</a>
-          <a href="#" aria-label="Terms of use link">Terms of Use</a>
-          <a href="#" aria-label="Contact link">Contact</a>
-        </nav>
-      </footer>
+            <div id="status" class="status"></div>
+        </div>
     </div>
+
+    <script>
+        const messagesEl = document.getElementById('messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const sherlockInput = document.getElementById('sherlock-input');
+        const sherlockBtn = document.getElementById('sherlock-btn');
+        const statusEl = document.getElementById('status');
+
+        function appendMessage(role, content, isLoading = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            if (isLoading) {
+                contentDiv.innerHTML = '<div class="loading-dots"><span>.</span><span>.</span><span>.</span></div>';
+            } else if (Array.isArray(content)) {
+                // For Sherlock results
+                contentDiv.innerHTML = content.join('<br>');
+            } else {
+                contentDiv.textContent = content;
+            }
+            
+            messageDiv.appendChild(contentDiv);
+            messagesEl.appendChild(messageDiv);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+            
+            return messageDiv;
+        }
+
+        function setStatus(text, isError = false, isLoading = false) {
+            statusEl.textContent = text;
+            statusEl.className = 'status';
+            if (isError) statusEl.classList.add('error');
+            if (isLoading) statusEl.classList.add('loading');
+        }
+
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            chatInput.value = '';
+            appendMessage('user', text);
+            
+            const loadingMsg = appendMessage('assistant', '', true);
+            setStatus('Thinking...', false, true);
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                loadingMsg.remove();
+                appendMessage('assistant', data.response);
+                setStatus('');
+            } catch (error) {
+                loadingMsg.remove();
+                appendMessage('system', `Error: ${error.message}`);
+                setStatus(`Error: ${error.message}`, true);
+            }
+        }
+
+        async function runSherlock() {
+            const input = sherlockInput.value.trim();
+            if (!input) return;
+
+            const usernames = input.split(',').map(u => u.trim()).filter(u => u);
+            if (usernames.length === 0) return;
+
+            sherlockInput.value = '';
+            appendMessage('user', `/sherlock ${usernames.join(', ')}`);
+            
+            const loadingMsg = appendMessage('assistant', '', true);
+            setStatus('Running Sherlock search...', false, true);
+
+            try {
+                const response = await fetch('/sherlock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usernames })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Sherlock request failed');
+                }
+
+                loadingMsg.remove();
+                
+                // Format Sherlock results
+                const results = Array.isArray(data.results) 
+                    ? data.results.map(r => {
+                        const username = r.username || r.name || 'Unknown';
+                        const urls = r.websites?.map(w => `• ${w.name}: ${w.url_user}`).join('<br>') || 'No profiles found';
+                        return `<strong>${username}</strong><br>${urls}`;
+                    })
+                    : [`Results: ${JSON.stringify(data.results).substring(0, 200)}...`];
+
+                appendMessage('assistant', results);
+                setStatus(data.message || 'Sherlock search completed');
+            } catch (error) {
+                loadingMsg.remove();
+                appendMessage('system', `Sherlock Error: ${error.message}`);
+                setStatus(`Error: ${error.message}`, true);
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        sherlockBtn.addEventListener('click', runSherlock);
+        sherlockInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                runSherlock();
+            }
+        });
+
+        // Initial message
+        window.addEventListener('load', () => {
+            appendMessage('assistant', 
+                "Hello. I'm here to listen without judgment. This is your space.\n\n" +
+                "You can:\n" +
+                "• Chat with me about anything you're going through\n" +
+                "• Use /sherlock to check if a username appears across social platforms (for your safety)\n\n" +
+                "I'm trauma-informed and prioritize your dignity and autonomy. What's on your mind?"
+            );
+        });
+    </script>
 
     <script src="secrets.js"></script>
     <script src="script.js"></script>
-  </body>
+</body>
 </html>
