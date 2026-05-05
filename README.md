@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://beckyblu.github.io/PI_AI/">
+  <a href="https://easmit60-arch.github.io/PI_AI/">
     <img src="RSN(Logo).webp" width="200"/>
   </a>
 </p>
